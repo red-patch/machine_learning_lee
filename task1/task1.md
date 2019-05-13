@@ -7,12 +7,14 @@
 ## 0、了解什么是Machine learning
 
 ## 1、中心极限定理
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
 
 > **中心极限定理**是[概率论](https://zh.wikipedia.org/wiki/概率论)中的一组定理。中心极限定理说明，在适当的条件下，大量相互独立[随机变量](https://zh.wikipedia.org/wiki/随机变量)的均值经适当标准化后[依分布收敛](https://zh.wikipedia.org/wiki/依分布收敛)于[正态分布](https://zh.wikipedia.org/wiki/正态分布)。这组定理是[数理统计学](https://zh.wikipedia.org/wiki/数理统计学)和误差分析的理论基础，指出了大量随机变量之和近似服从正态分布的条件。
 
 ### 1.1 棣莫佛－拉普拉斯定理
 
 > 棣莫佛－拉普拉斯（de Moivre - Laplace）定理是中央极限定理的最初版本，讨论了服从[二项分布](https://zh.wikipedia.org/wiki/二项分布)的随机变量序列。它指出，参数为*n*, *p*的二项分布以*np*为均值、*np(1-p)*为方差的正态分布为极限
+
 
 $$
 若 {\displaystyle X\sim B(n,p)} 是 {\displaystyle n}次伯努利实验中事件 A 出现的次数，每次试验成功的概率为 {\displaystyle p} p，且 {\displaystyle q=1-p}，则对任意有限区间 {\displaystyle [a,b]}：
