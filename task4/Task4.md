@@ -101,3 +101,10 @@ $$
 $$
 
 > 参考：https://github.com/thisisreallife/Hungyi_Lee_ML2017/blob/master/task_and_answer/task4/task4_ans.md
+>
+> https://zhuanlan.zhihu.com/p/26262151
+>
+> [朴素贝叶斯分类器]([https://zh.wikipedia.org/wiki/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8](https://zh.wikipedia.org/wiki/朴素贝叶斯分类器))
+>
+> [CodingLabs](https://www.cnblogs.com/leoo2sk/)
+
