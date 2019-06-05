@@ -110,9 +110,351 @@
 > $$
 > D_{K L}(p \| q) \geq 0
 > $$
-> 等价于最小化交叉熵 H(p,q) 也等价于最大化似然估计
+> 等价于最小化交叉熵 H(p,q) 也等价于最大化似然估计.
+>
+> **在机器学习中，我们希望在训练数据上模型学到的分布 P(model) 和真实数据的分布 P(real) 越接近越好，所以我们可以使其相对熵最小。但是我们没有真实数据的分布，所以只能希望模型学到的分布 P(model) 和训练数据的分布 P(train) 尽量相同。假设训练数据是从总体中独立同分布采样的，那么我们可以通过最小化训练数据的经验误差来降低模型的泛化误差。即：**
+>
+> 1、希望学到的模型的分布和真实分布一致，
+> $$
+> P(\text { model }) \simeq P(\text { real })
+> $$
+> 2、但是真实分布不可知，假设训练数据是从真实数据中独立同分布采样的，
+> $$
+> P(\text {train}) \simeq P(\text {real})
+> $$
+> 3、我们希望学到的模型分布至少和训练数据的分布一致，
+> $$
+> P(\text {train}) \simeq P(\text {model})
+> $$
+> 最小化训练数据上的分布  P(train)P(train) 与最小化模型分布 P(model)P(model) 的差异等价于最小化相对熵，
+> $$
+> D_{K L}(P(\text {train}) \| P(\text {model}))
+> $$
+> 此时， P(train) 就是
+> $$
+> D_{K L}(p \| q)
+> $$
+> 中的 p，即真实分布，P(model) 就是 q。又因为训练数据的分布 p 是给定的，所以求DKL(p||q) 等价于求 H(p,q)，所以**交叉熵可以用来计算学习模型分布与训练分布之间的差异**。
 
-### 引用
+### 代码
+
+```python
+import numpy as np
+import pandas as pd
+```
+
+
+```python
+data=pd.read_csv('watermelon_3a.csv')
+data
+```
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+    
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Idx</th>
+      <th>color</th>
+      <th>root</th>
+      <th>knocks</th>
+      <th>texture</th>
+      <th>navel</th>
+      <th>touch</th>
+      <th>density</th>
+      <th>sugar_ratio</th>
+      <th>label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>dark_green</td>
+      <td>curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.697</td>
+      <td>0.460</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>black</td>
+      <td>curl_up</td>
+      <td>heavily</td>
+      <td>distinct</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.774</td>
+      <td>0.376</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>black</td>
+      <td>curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.634</td>
+      <td>0.264</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>dark_green</td>
+      <td>curl_up</td>
+      <td>heavily</td>
+      <td>distinct</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.608</td>
+      <td>0.318</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>light_white</td>
+      <td>curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.556</td>
+      <td>0.215</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>6</td>
+      <td>dark_green</td>
+      <td>little_curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>little_sinking</td>
+      <td>soft_stick</td>
+      <td>0.403</td>
+      <td>0.237</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>7</td>
+      <td>black</td>
+      <td>little_curl_up</td>
+      <td>little_heavily</td>
+      <td>little_blur</td>
+      <td>little_sinking</td>
+      <td>soft_stick</td>
+      <td>0.481</td>
+      <td>0.149</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>8</td>
+      <td>black</td>
+      <td>little_curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>little_sinking</td>
+      <td>hard_smooth</td>
+      <td>0.437</td>
+      <td>0.211</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>9</td>
+      <td>black</td>
+      <td>little_curl_up</td>
+      <td>heavily</td>
+      <td>little_blur</td>
+      <td>little_sinking</td>
+      <td>hard_smooth</td>
+      <td>0.666</td>
+      <td>0.091</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>10</td>
+      <td>dark_green</td>
+      <td>stiff</td>
+      <td>clear</td>
+      <td>distinct</td>
+      <td>even</td>
+      <td>soft_stick</td>
+      <td>0.243</td>
+      <td>0.267</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>11</td>
+      <td>light_white</td>
+      <td>stiff</td>
+      <td>clear</td>
+      <td>blur</td>
+      <td>even</td>
+      <td>hard_smooth</td>
+      <td>0.245</td>
+      <td>0.057</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>12</td>
+      <td>light_white</td>
+      <td>curl_up</td>
+      <td>little_heavily</td>
+      <td>blur</td>
+      <td>even</td>
+      <td>soft_stick</td>
+      <td>0.343</td>
+      <td>0.099</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>13</td>
+      <td>dark_green</td>
+      <td>little_curl_up</td>
+      <td>little_heavily</td>
+      <td>little_blur</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.639</td>
+      <td>0.161</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>14</td>
+      <td>light_white</td>
+      <td>little_curl_up</td>
+      <td>heavily</td>
+      <td>little_blur</td>
+      <td>sinking</td>
+      <td>hard_smooth</td>
+      <td>0.657</td>
+      <td>0.198</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>15</td>
+      <td>black</td>
+      <td>little_curl_up</td>
+      <td>little_heavily</td>
+      <td>distinct</td>
+      <td>little_sinking</td>
+      <td>soft_stick</td>
+      <td>0.360</td>
+      <td>0.370</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>16</td>
+      <td>light_white</td>
+      <td>curl_up</td>
+      <td>little_heavily</td>
+      <td>blur</td>
+      <td>even</td>
+      <td>hard_smooth</td>
+      <td>0.593</td>
+      <td>0.042</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>17</td>
+      <td>dark_green</td>
+      <td>curl_up</td>
+      <td>heavily</td>
+      <td>little_blur</td>
+      <td>little_sinking</td>
+      <td>hard_smooth</td>
+      <td>0.719</td>
+      <td>0.103</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+```python
+def cancShannonEnt(dataSet,featIndex=-1):
+        numEntries = len(dataSet)  # 获取数据的行数
+        labelCounts = {}  # 设置字典数据格式，想要存储的数据格式为：类别：频数
+        for featVec in dataSet: # 获取数据集每一行的数据
+            currentLabel = featVec[featIndex]  # 获取特征向量的最后一列
+            # 检查字典中key是否存在
+            # 如果key不存在
+            if currentLabel not in labelCounts.keys():
+                # 将当前的标签存于字典中，并将频数置为0
+                labelCounts[currentLabel] = 0
+            # 如果key存在，在当前的键值上+1
+            labelCounts[currentLabel] += 1
+        # 数据已准备好，计算熵
+        shannonEnt = 0.0  # 初始化信息熵
+        for key in labelCounts:  # 遍历出数据中所的类别
+            pro = float(labelCounts[key]) / numEntries
+            print(pro)
+            shannonEnt -= pro * np.log2(pro)  # 计算信息熵
+        return shannonEnt
+```
+
+
+```python
+cancShannonEnt(np.array(data),-2)
+```
+
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+    0.058823529411764705
+
+    4.08746284125034
+
+### 参考
 
 > https://www.cnblogs.com/kyrieng/p/8694705.html
 >
